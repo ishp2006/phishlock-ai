@@ -73,30 +73,46 @@ Open this address in your browser:
 
 http://127.0.0.1:5000
 
-## Deploying to Render (Free Tier)
+## Deployment Architecture
 
-This repository is configured for direct deployment on [Render](https://render.com) as a full-stack Web Service (serving both the Flask API and frontend dashboard together).
+PhishLock AI is configured to run in two deployment modes:
+1. **Frontend on Vercel + Backend on Render** (Decoupled Cloud Architecture)
+2. **Unified on Render** (Single Full-Stack Web Service)
 
-### Method 1: Render Blueprints (Recommended — 1-Click Setup)
-1. Push this repository to your GitHub account.
-2. In Render Dashboard, click **New +** > **Blueprint**.
-3. Select your repository. Render will automatically read `render.yaml`, configure Python, install dependencies, and launch with Gunicorn.
-4. Click **Apply**.
+---
 
-### Method 2: Manual Web Service Setup
+### Mode 1: Frontend on Vercel + Backend on Render
+
+#### Step A: Deploy Backend to Render (Free Web Service)
 1. Push this repository to GitHub.
-2. In Render Dashboard, click **New +** > **Web Service**.
-3. Connect your GitHub repository.
-4. Fill in the service settings:
-   - **Name:** `phishlock-ai`
+2. In [Render Dashboard](https://dashboard.render.com), click **New +** > **Web Service**.
+3. Select your repository:
+   - **Name:** `phishlock-ai-api`
    - **Environment:** `Python 3`
-   - **Branch:** `main`
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `gunicorn app:app`
    - **Plan:** `Free`
-5. Click **Create Web Service**.
+4. Click **Create Web Service**.
+5. Copy your live Render URL (e.g., `https://phishlock-ai-api.onrender.com`).
 
-Once deployed, Render provides an HTTPS URL (e.g. `https://phishlock-ai.onrender.com`) where your full dashboard and APIs are immediately accessible.
+#### Step B: Deploy Frontend to Vercel
+1. Log in to [Vercel](https://vercel.com) and click **Add New...** > **Project**.
+2. Import your GitHub repository (`phishlock-ai`).
+3. Leave **Framework Preset** as **Other** (Root directory: `./`).
+4. Click **Deploy**.
+5. Vercel will deploy your static files (`index.html`, `style.css`, `script.js`).
+
+#### Step C: Connect Frontend to Backend
+- Update `DEFAULT_RENDER_BACKEND_URL` in `script.js` or `vercel.json` with your live Render backend URL.
+- CORS is pre-configured on Flask to accept cross-origin requests from any Vercel domain (`*.vercel.app`).
+- *Note:* Render's free tier spins down after inactivity. When you initiate the first scan after sleep, give it ~30 seconds to wake up.
+
+---
+
+### Mode 2: Unified Deployment on Render (Alternative)
+If you prefer a single service without configuring cross-service URLs:
+1. In Render Dashboard, click **New +** > **Blueprint**.
+2. Select your repository. Render uses `render.yaml` to deploy both frontend and backend under one URL automatically.
 
 ---
 

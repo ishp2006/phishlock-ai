@@ -125,8 +125,10 @@ def serve_frontend(path):
 # Health endpoint
 # ---------------------------------------------------------------------------
 
-@app.route('/api/health', methods=['GET'])
+@app.route('/api/health', methods=['GET', 'OPTIONS'])
 def health():
+    if request.method == 'OPTIONS':
+        return '', 204
     return jsonify({
         'status': 'ok',
         'service': 'PhishLock Security Suite',

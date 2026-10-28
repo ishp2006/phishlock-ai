@@ -3,7 +3,17 @@
  * Client-side heuristic analysis and demonstration telemetry engine.
  */
 
-const API_BASE = window.PHISHLOCK_API_BASE || '';
+/**
+ * Backend API Configuration
+ * - Local development: uses '' (relative to http://localhost:5000)
+ * - Vercel production: points to your live Render backend URL
+ * Replace DEFAULT_RENDER_BACKEND_URL with your actual Render service URL once created.
+ */
+const DEFAULT_RENDER_BACKEND_URL = 'https://phishlock-ai.onrender.com';
+
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? ''
+  : (window.PHISHLOCK_API_BASE || localStorage.getItem('PHISHLOCK_API_BASE') || DEFAULT_RENDER_BACKEND_URL);
 
 const appState = {
   activeTab: 'dashboard',
@@ -528,8 +538,12 @@ async function handleUrlScanSubmit(event) {
 
   } catch (err) {
     console.error('URL analysis failed:', err);
-    showValidation(validationEl, `Analysis error: ${err.message}`, "error");
-    showToast(`Analysis failed: ${err.message}`, "error");
+    let errMsg = err.message || 'Unknown network error';
+    if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')) {
+      errMsg = 'Cannot reach backend server. If running on Render free tier, please wait ~30-50s for it to wake up from idle sleep and retry.';
+    }
+    showValidation(validationEl, `Analysis error: ${errMsg}`, "error");
+    showToast(`Analysis failed: ${errMsg}`, "error");
   } finally {
     if (analyzeBtn) {
       analyzeBtn.disabled = false;
@@ -622,8 +636,12 @@ async function handleMessageScanSubmit(event) {
 
   } catch (err) {
     console.error('Message analysis failed:', err);
-    showValidation(validationEl, `Analysis error: ${err.message}`, "error");
-    showToast(`Analysis failed: ${err.message}`, "error");
+    let errMsg = err.message || 'Unknown network error';
+    if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')) {
+      errMsg = 'Cannot reach backend server. If running on Render free tier, please wait ~30-50s for it to wake up from idle sleep and retry.';
+    }
+    showValidation(validationEl, `Analysis error: ${errMsg}`, "error");
+    showToast(`Analysis failed: ${errMsg}`, "error");
   } finally {
     if (analyzeBtn) {
       analyzeBtn.disabled = false;
